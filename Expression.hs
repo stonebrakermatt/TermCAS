@@ -5,29 +5,18 @@
  - File for handling commands
  - program -}
 module Expression where
+import qualified Operator as O
 
 
-
-
-data Op
-    = Power
-    | Times
-    | DivBy
-    | Plus
-    | Minus
-    | Mod
-    | Choose
-    | Permute
-    deriving (Show, Read, Eq)
 
 
 
 data Expression
     = Negate Expression
     | Factorial Expression
-    | Binary Op Expression Expression
+    | Binary O.Op Expression Expression
     | Parenthetical Expression
-    | FCall Expression [Expression]
+    | FCall [Char] [Expression]
     | Id [Char]
     | Num [Char]
     deriving (Show, Read, Eq)

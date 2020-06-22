@@ -9,6 +9,10 @@ module IOUtils.Regex.GrammarRegexes ( language_regexes ) where
 import qualified IOUtils.Regex.Keywords as K
 import qualified IOUtils.Regex.Type as R 
 
+
+
+
+
 {- Regular expression to match digits 1-9 -}
 regex_nonzero_digit :: R.Regex Char
 regex_nonzero_digit = R.RegexInSet ['1'..'9']
@@ -58,6 +62,7 @@ regex_number = R.RegexOr
             , regex_number_fractional_part ]
         , R.RegexMaybe regex_number_exponential_part ]
     : map R.RegexWord K.constants )
+
 {- Regular expression for matching identifiers for
  - variables, functions, sets, etc. -}
 regex_identifier :: R.Regex Char
@@ -86,14 +91,19 @@ regex_binary_operator = R.RegexOr
 regex_badinput :: R.Regex Char
 regex_badinput = R.RegexNotInSet []
 
+{- Regular expression for operators -}
 regex_operator :: R.Regex Char
 regex_operator = R.RegexOr
     [ regex_unary_operator
     , regex_binary_operator ]
 
+{- Regular expression for whitespace -}
 regex_space :: R.Regex Char
 regex_space = R.RegexInSet " \t"
 
+
+
+{- All regexes for this grammar -}
 language_regexes = 
     [ regex_delimiter
     , regex_operator

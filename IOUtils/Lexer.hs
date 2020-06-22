@@ -4,20 +4,31 @@
  - 
  - File for lexing user input -}
 module IOUtils.Lexer where
-
 import qualified IOUtils.Capture as C
 import qualified IOUtils.Regex.GrammarRegexes as G
 import qualified IOUtils.Regex.Type as R
-import qualified IOUtils.Tokens as T
+import qualified IOUtils.Token as T
 
 
+
+
+
+{- Lexer type for simplifying type signatures -}
 type Lexer a = [a] -> [T.InputToken]
+
+{- Types for matching to simplify type signatures -}
 type MatchContext a = [(R.Regex a, [a] -> T.InputToken)]
 type MatchResult a = ([a], T.InputToken)
 
+
+
+{- A type for storing the list of pairs of regexes 
+ - and matching constructors -}
 match_context :: MatchContext Char
 match_context = zip G.language_regexes T.token_constructors
 
+{- Matches a single token, returning the token
+ - and the remaining input to be lexed -}
 match :: [Char] -> MatchResult Char
 match user_input =
     let match' user_input [] = (user_input, T.SpaceToken "")
@@ -27,14 +38,16 @@ match user_input =
                 Just (tok, input_tail) -> (input_tail, tokenizer tok)
     in match' user_input match_context
 
-lex :: Lexer Char
-lex user_input = 
-    let lex' [] revtokens = revtokens
-        lex' uinput revtokens = 
+{- Lexes all user input, using match -}
+lex_input :: Lexer Char
+lex_input user_input = 
+    let lex_input' [] revtokens = revtokens
+        lex_input' uinput revtokens = 
             let (input_tail, tok) = match uinput
-            in lex' input_tail (tok : revtokens)
-    in lex' user_input []
+            in lex_input' input_tail (tok : revtokens)
+    in lex_input' user_input []
 
+{- Removes spaces from lexed input -}
 remove_spaces :: Lexer T.InputToken
 remove_spaces revtokens = 
     let remove_spaces' [] tokens = tokens
@@ -42,3 +55,9 @@ remove_spaces revtokens =
             T.SpaceToken _ -> remove_spaces' revtokens tokens
             _ -> remove_spaces' revtokens (tok : tokens)
     in remove_spaces' revtokens []
+
+
+
+{- Lexes input and removes spaces -}
+lex :: [Char] -> [T.InputToken]
+lex = remove_spaces.lex_input

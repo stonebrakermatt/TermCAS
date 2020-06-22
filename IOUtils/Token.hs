@@ -4,12 +4,13 @@
  -
  - File for defining valid user input
  - tokens to match while lexing -}
-module IOUtils.Tokens where
+module IOUtils.Token where
 
 
 
 
 
+{- Token type for lexing user input -}
 data InputToken 
     = IdToken [Char]
     | OpToken [Char]
@@ -19,6 +20,9 @@ data InputToken
     | BadInputToken [Char]
     deriving (Read, Eq)
 
+
+
+{- Token constructors. See Lexer for its use -}
 token_constructors = 
     [ DelimiterToken
     , OpToken
@@ -27,6 +31,7 @@ token_constructors =
     , SpaceToken
     , BadInputToken ]
 
+{- Define how tokens are printed -}
 instance Show InputToken where
     show (IdToken str) = "<id:" ++ str ++ ">"
     show (OpToken str) = "<op:" ++ str ++ ">"
