@@ -10,4 +10,7 @@ import qualified Expression as E
 
 
 
-data Command = Eval E.Expression | Assign E.Expression E.Expression
+data Command 
+    = Eval E.Expression
+    | Assign E.Expression E.Expression
+    deriving (Read, Show)

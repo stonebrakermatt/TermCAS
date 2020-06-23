@@ -274,3 +274,28 @@ parse_parens input =
             parse_f parens `bind` (\(exp, _) -> -- parse_expr
             Just (E.Parenthetical exp, input2)))
         _ -> Nothing)
+
+
+
+{- Functionality for parsing commands starts below -}
+
+{- Splits tokens at equals. Returns Nothing if there is no
+ - assignment or an lvalue and rvalue for assignment -}
+split_equals :: [T.InputToken] -> Maybe ([T.InputToken], [T.InputToken])
+split_equals input =
+    let split_equals' [] revtokens = Nothing
+        split_equals' (t : tokens) revtokens = case t of
+            T.DelimiterToken "=" -> Just (reverse revtokens, tokens)
+            _ -> split_equals' tokens (t : revtokens)
+    in split_equals' input []
+
+parse_input :: [Char] -> Maybe D.Command
+parse_input input = 
+    let lexed_input = L.lex input
+    in case split_equals lexed_input of
+        Nothing -> case parse_expr lexed_input of
+            Just (e, _) -> Just (D.Eval e)
+            Nothing -> Nothing
+        Just (l, r) -> case (parse_expr l, parse_expr r) of
+            (Just (lvalue, _), Just (rvalue, _)) -> Just (D.Assign lvalue rvalue)
+            _ -> Nothing
