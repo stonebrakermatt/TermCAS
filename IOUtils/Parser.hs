@@ -7,8 +7,8 @@ module IOUtils.Parser where
 import qualified IOUtils.Command as D
 import qualified IOUtils.Lexer as L
 import qualified IOUtils.Token as T
-import qualified Expression as E
-import qualified Operator as O
+import qualified Data.Expression as E
+import qualified Data.Operator as O
 
 
 

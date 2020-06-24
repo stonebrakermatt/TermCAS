@@ -4,7 +4,7 @@
  - 
  - File for handling commands
  - program -}
-module Operator where
+module Data.Operator where
 
 
 
@@ -20,7 +20,7 @@ data Op
     | Mod
     | Choose
     | Permute
-    deriving (Show, Read, Eq)
+    deriving (Read, Eq)
 
 
 
@@ -45,3 +45,16 @@ operator_precedence Minus = 2
 operator_precedence Times = 3
 operator_precedence DivBy = 3
 operator_precedence Power = 4
+
+
+
+{- How to print the operations -}
+instance Show Op where
+    show Power = "^"
+    show Times = "*"
+    show DivBy = "/"
+    show Plus = "+"
+    show Minus = "-"
+    show Mod = " mod "
+    show Choose = " choose "
+    show Permute = " permute "

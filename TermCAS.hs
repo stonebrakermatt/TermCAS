@@ -5,7 +5,9 @@
  - Main file -}
 module Main where
 import System.IO
+import qualified Context as C
 import qualified IOUtils.Command as D
+import qualified Dialog.Help as H
 import qualified IOUtils.Lexer as L
 import qualified IOUtils.Parser as P
 
@@ -14,14 +16,20 @@ import qualified IOUtils.Parser as P
 
 
 main :: IO ()
-main = do
+main = repl
+
+repl :: IO ()
+repl = do
     putStr "=> "
     hFlush stdout
     str <- getLine
-    if str == "\\exit"
-    then return ()
-    else if str == "\\help"
-    then return ()
-    else do
-        (putStrLn . show) (P.parse_input str)
-        main
+    if str /= "\\exit"
+        then
+            if str == "\\help"
+            then do
+                H.help
+                main
+            else do
+                (putStrLn . show) (P.bind (P.parse_input str) C.create_context_entry)
+                main
+        else return ()
