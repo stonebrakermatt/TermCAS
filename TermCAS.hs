@@ -6,8 +6,9 @@
 module Main where
 import System.IO
 import qualified Dialog.About as A
-import qualified Context as C
+import qualified Data.ContextUtils as C
 import qualified IOUtils.Command as D
+import qualified Data.Expression as E 
 import qualified Dialog.Help as H
 import qualified IOUtils.Lexer as L
 import qualified IOUtils.Parser as P
@@ -20,7 +21,7 @@ import qualified Dialog.Welcome as W
 main :: IO ()
 main = repl 0 []
 
-repl :: Int -> C.Context -> IO ()
+repl :: Int -> E.Context -> IO ()
 repl n context = if n == 0
     then do 
         W.welcome
@@ -54,6 +55,7 @@ repl n context = if n == 0
                             repl (n + 1) context
                     Just (D.Eval e) -> do
                         (putStrLn . show) e
+                        sequence_ (map (putStrLn . show) (E.get_dependencies e))
                         repl (n + 1) context
                     _ -> do
                         putStrLn "Error occurred while parsing input"
