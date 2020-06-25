@@ -18,28 +18,43 @@ import qualified Dialog.Welcome as W
 
 
 main :: IO ()
-main = repl 0
+main = repl 0 []
 
-repl :: Int -> IO ()
-repl n = if n == 0
+repl :: Int -> C.Context -> IO ()
+repl n context = if n == 0
     then do 
         W.welcome
-        repl 1
+        repl 1 context
     else do
-        putStr "=> "
+        putStr $ show n ++ " => "
         hFlush stdout
         str <- getLine
-        if str /= "\\exit"
-            then
-                if str == "\\help"
-                then do
-                    H.help
-                    repl (n + 1)
-                else if str == "\\about" 
-                    then do
-                        A.about
-                        repl (n + 1)
-                    else do 
-                        (putStrLn . show) (P.bind (P.parse_input str) C.create_context_entry)
-                        repl (n + 1)
-            else return ()
+        case str of 
+            "\\exit" -> return ()
+            "\\about" -> do
+                A.about
+                repl n context
+            "\\bindings" -> do
+                putStrLn ""
+                putStrLn "Current bindings:"
+                sequence_ (map (putStrLn . show) context)
+                putStrLn ""
+                repl n context
+            "\\help" -> do
+                H.help
+                repl n context
+            _ -> 
+                let parsed_input = P.parse_input str
+                in case parsed_input of
+                    Just (D.Assign e1 e2) -> case C.create_context_entry e1 e2 of
+                        Just entry -> do 
+                            repl (n + 1) (C.context_insert context entry)
+                        Nothing -> do
+                            putStrLn "Error occurred while creating variable"
+                            repl (n + 1) context
+                    Just (D.Eval e) -> do
+                        (putStrLn . show) e
+                        repl (n + 1) context
+                    _ -> do
+                        putStrLn "Error occurred while parsing input"
+                        repl (n + 1) context

@@ -5,7 +5,7 @@
  - File defining a regular expression data type 
  - as well as functions for how to display and
  - read data of this type -}
-module IOUtils.Regex.GrammarRegexes ( language_regexes ) where
+module IOUtils.Regex.GrammarRegexes where
 import qualified IOUtils.Regex.Keywords as K
 import qualified IOUtils.Regex.Type as R 
 
@@ -48,6 +48,12 @@ regex_number_exponential_part = R.RegexAnd
         [ R.RegexConst 'E'
         , R.RegexConst 'e' ]
     , regex_number_integer_part ]
+
+{- Regular expression for matching integers -}
+regex_int :: R.Regex Char
+regex_int = R.RegexAnd 
+    [ regex_number_integer_part
+    , R.RegexMaybe regex_number_exponential_part ]
 
 {- Regular expression for matching positive numbers
  - (negative numbers obtained through negation, which is an

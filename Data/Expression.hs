@@ -5,6 +5,8 @@
  - File for handling commands
  - program -}
 module Data.Expression where
+import qualified IOUtils.Capture as C
+import qualified IOUtils.Regex.GrammarRegexes as G
 import qualified Data.Operator as O
 
 
@@ -22,14 +24,29 @@ data Expression
     
 
 
+{- Classifying expressions for more thoughtful output -}
+is_integer :: Expression -> Bool
+is_integer (Negate e) = is_integer e
+is_integer (Binary o e1 e2)
+    | is_integer e1 && is_integer e2 = True
+    | otherwise = False
+is_integer (Parenthetical e) = is_integer e
+is_integer (FCall f args) = False -- Come back to this
+is_integer (Id i) = False -- And this
+is_integer (Num n) = case n `C.capture` G.regex_int of
+    Nothing -> False
+    Just (match, rem) -> 
+        if rem == []
+            then True
+            else False
+
 {- Helpers for showing args -}
 get_arg_str :: [Expression] -> [String]
 get_arg_str exprs = map show exprs
 add_commas :: [String] -> String -> String
 add_commas [] revStr = reverse revStr
 add_commas (s : []) revStr = reverse (s ++ revStr)
-add_commas (s1 : s2 : strs) revStr = add_commas (s2 : strs) ("," ++ s1 ++ revStr)
-        
+add_commas (s1 : s2 : strs) revStr = add_commas (s2 : strs) ("," ++ s1 ++ revStr)        
 
 {- How to print expressions -}
 instance Show Expression where
