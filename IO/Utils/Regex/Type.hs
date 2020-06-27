@@ -5,7 +5,7 @@
  - File defining a regular expression data type
  - as well as functions for how to display and 
  - read data of this type -}
-module IOUtils.Regex.Type where
+module IO.Utils.Regex.Type where
 
 
 

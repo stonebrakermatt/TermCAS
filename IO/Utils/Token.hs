@@ -4,7 +4,7 @@
  -
  - File for defining valid user input
  - tokens to match while lexing -}
-module IOUtils.Token where
+module IO.Utils.Token where
 
 
 

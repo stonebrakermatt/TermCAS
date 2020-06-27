@@ -3,10 +3,10 @@
  - (c) 2020 Matt Stonebraker
  - 
  - File for parsing user input -}
-module IOUtils.Parser where
-import qualified IOUtils.Command as D
-import qualified IOUtils.Lexer as L
-import qualified IOUtils.Token as T
+module IO.Utils.Parser where
+import qualified IO.Utils.Command as D
+import qualified IO.Utils.Lexer as L
+import qualified IO.Utils.Token as T
 import qualified ExpData.Expression as E
 import qualified ExpData.Operator as O
 

@@ -4,8 +4,8 @@
  - 
  - File for capturing regular expressions 
  - off the head of a list -}
-module IOUtils.Capture ( capture ) where
-import qualified IOUtils.Regex.Type as R
+module IO.Utils.Capture ( capture ) where
+import qualified IO.Utils.Regex.Type as R
 
 {- Capture function to handle matching regular expressions
  - against user input. If the function does not return nothing, 

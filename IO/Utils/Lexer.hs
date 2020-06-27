@@ -3,11 +3,11 @@
  - (c) 2020 Matt Stonebraker
  - 
  - File for lexing user input -}
-module IOUtils.Lexer where
-import qualified IOUtils.Capture as C
-import qualified IOUtils.Regex.GrammarRegexes as G
-import qualified IOUtils.Regex.Type as R
-import qualified IOUtils.Token as T
+module IO.Utils.Lexer where
+import qualified IO.Utils.Capture as C
+import qualified IO.Utils.Regex.GrammarRegexes as G
+import qualified IO.Utils.Regex.Type as R
+import qualified IO.Utils.Token as T
 
 
 

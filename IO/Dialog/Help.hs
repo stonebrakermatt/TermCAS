@@ -4,7 +4,7 @@
  - 
  - File for printing the help message
  - program -}
-module Dialog.Help where
+module IO.Dialog.Help where
 
 
 

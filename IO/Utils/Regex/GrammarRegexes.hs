@@ -5,9 +5,9 @@
  - File defining a regular expression data type 
  - as well as functions for how to display and
  - read data of this type -}
-module IOUtils.Regex.GrammarRegexes where
-import qualified IOUtils.Regex.Keywords as K
-import qualified IOUtils.Regex.Type as R 
+module IO.Utils.Regex.GrammarRegexes where
+import qualified IO.Utils.Regex.Keywords as K
+import qualified IO.Utils.Regex.Type as R 
 
 
 

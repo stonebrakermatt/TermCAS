@@ -5,9 +5,9 @@
  - File for handling commands
  - program -}
 module ExpData.Expression where
-import qualified IOUtils.Capture as C
-import qualified IOUtils.Regex.GrammarRegexes as G
-import qualified IOUtils.Regex.Keywords as K
+import qualified IO.Utils.Capture as C
+import qualified IO.Utils.Regex.GrammarRegexes as G
+import qualified IO.Utils.Regex.Keywords as K
 import qualified ExpData.Operator as O
 
 

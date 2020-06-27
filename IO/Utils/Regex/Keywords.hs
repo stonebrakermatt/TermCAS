@@ -5,7 +5,7 @@
  - File defining the keywords for 
  - special string literals recognized
  - by this program -}
-module IOUtils.Regex.Keywords 
+module IO.Utils.Regex.Keywords 
     ( builtin_commands
     , special_funcs
     , discrete_ops 

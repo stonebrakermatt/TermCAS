@@ -4,7 +4,7 @@
  - 
  - File for printing the about message
  - program -}
-module Dialog.About where
+module IO.Dialog.About where
 
 
 

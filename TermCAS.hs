@@ -5,13 +5,13 @@
  - Main file -}
 module Main where
 import System.IO
-import qualified Dialog.About as A
+import qualified IO.Dialog.About as A
 import qualified ExpData.ContextUtils as C
-import qualified IOUtils.Command as D
+import qualified IO.Utils.Command as D
 import qualified ExpData.Expression as E 
-import qualified Dialog.Help as H
-import qualified IOUtils.Parser as P
-import qualified Dialog.Welcome as W
+import qualified IO.Dialog.Help as H
+import qualified IO.Utils.Parser as P
+import qualified IO.Dialog.Welcome as W
 
 
 
