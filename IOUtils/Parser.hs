@@ -7,8 +7,8 @@ module IOUtils.Parser where
 import qualified IOUtils.Command as D
 import qualified IOUtils.Lexer as L
 import qualified IOUtils.Token as T
-import qualified Data.Expression as E
-import qualified Data.Operator as O
+import qualified ExpData.Expression as E
+import qualified ExpData.Operator as O
 
 
 
@@ -290,12 +290,17 @@ split_equals input =
     in split_equals' input []
 
 parse_input :: [Char] -> Maybe D.Command
-parse_input input = 
-    let lexed_input = L.lex input
-    in case split_equals lexed_input of
-        Nothing -> case parse_expr lexed_input of
-            Just (e, _) -> Just (D.Eval e)
-            Nothing -> Nothing
-        Just (l, r) -> case (parse_expr l, parse_expr r) of
-            (Just (lvalue, _), Just (rvalue, _)) -> Just (D.Assign lvalue rvalue)
-            _ -> Nothing
+parse_input input
+    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\about" = Just D.About
+    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\bindings" = Just D.Bindings
+    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\exit" = Just D.Exit
+    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\help" = Just D.Help
+    | otherwise =
+        let lexed_input = L.lex input
+        in case split_equals lexed_input of
+            Nothing -> case parse_expr lexed_input of
+                Just (e, _) -> Just (D.Eval e)
+                Nothing -> Nothing
+            Just (l, r) -> case (parse_expr l, parse_expr r) of
+                (Just (lvalue, _), Just (rvalue, _)) -> Just (D.Assign lvalue rvalue)
+                _ -> Nothing

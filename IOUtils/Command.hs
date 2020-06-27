@@ -5,7 +5,7 @@
  - File for handling commands
  - program -}
 module IOUtils.Command where
-import qualified Data.Expression as E
+import qualified ExpData.Expression as E
 
 
 
@@ -14,4 +14,8 @@ import qualified Data.Expression as E
 data Command 
     = Eval E.Expression
     | Assign E.Expression E.Expression
+    | About
+    | Bindings
+    | Exit
+    | Help
     deriving (Read, Show)

@@ -6,13 +6,21 @@
  - special string literals recognized
  - by this program -}
 module IOUtils.Regex.Keywords 
-    ( special_funcs
+    ( builtin_commands
+    , special_funcs
     , discrete_ops 
     , constants ) where
 
 
 
 
+
+{- Builtin commands -}
+builtin_commands = 
+    [ "\\about"
+    , "\\bindings"
+    , "\\exit"
+    , "\\help" ]
 
 {- Trig functions -}
 trig_funcs =
