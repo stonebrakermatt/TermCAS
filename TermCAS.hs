@@ -43,16 +43,64 @@ repl n context = if n == 0
             Just D.Help -> do
                 H.help
                 repl n context
-            Just (D.Assign e1 e2) -> case C.create_context_entry e1 e2 of
-                Just entry -> do 
-                    repl (n + 1) (C.context_insert context entry)
-                Nothing -> do
-                    putStrLn "Error occurred while creating variable"
-                    repl n context
-            Just (D.Eval e) -> do
-                (putStrLn . show) e
-                sequence_ (map (putStrLn . show) (E.get_dependencies e))
-                repl (n + 1) context
+            Just (D.Assign e1 e2) -> handle_assign n context e1 e2 
+            Just (D.Eval e) -> handle_eval n context e         
             _ -> do
                 putStrLn "Error occurred while parsing input"
                 repl n context
+
+filterfunction arg = case arg of
+    E.Id x -> True
+    _ -> False
+
+eliminate (Just a) = a
+eliminate (Nothing) = E.Variable ("pi", E.Num "pi")
+
+argcontext args = 
+    let maybe_context = map (\x -> C.create_context_entry x x) args
+    in map eliminate maybe_context
+
+handle_assign :: Int -> E.Context -> E.Expression -> E.Expression -> IO ()
+handle_assign n context e1 e2 = case e1 of
+    E.FCall f args -> 
+        if length (filter filterfunction args) == length args
+            then
+                if (argcontext args ++ context) 
+                    `E.satisfies_dependencies` 
+                    (E.get_dependencies e2)
+                    then case C.create_context_entry e1 e2 of
+                        Just entry -> repl (n + 1) (C.context_insert context entry)
+                        Nothing -> do
+                            putStrLn "Error occurred while creating variable"
+                            repl n context
+                    else do
+                        putStrLn "Dependencies not satisfied for this expression"
+                        repl n context
+            else do
+                putStrLn "Error with function arguments"
+                repl n context
+    E.Id x -> 
+        if context `E.satisfies_dependencies` (E.get_dependencies e2)
+            then case C.create_context_entry e1 e2 of
+                Just entry -> repl (n + 1) (C.context_insert context entry)
+                Nothing -> do
+                    putStrLn "Error occurred while creating variable"
+                    repl n context
+            else do
+                putStrLn "Dependencies not satisfied for this expression"
+                repl n context
+    _ -> do
+        putStrLn "Cannot bind to this expression"
+        repl n context
+   
+
+handle_eval :: Int -> E.Context ->  E.Expression -> IO ()
+handle_eval n context e = if context `E.satisfies_dependencies` (E.get_dependencies e)
+    then do
+        putStrLn ("OUT: " ++ (show (e `E.apply_all_context` context)))
+        repl (n + 1) context
+    else do
+        sequence_ (map (putStrLn . show) (E.get_dependencies e))
+        putStrLn "Dependencies not satisfied for this expression"
+        repl n context
+
