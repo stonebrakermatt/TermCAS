@@ -3,13 +3,12 @@
  - (c) 2020 Matt Stonebraker
  - 
  - File for parsing user input -}
-module IO.Utils.Parser where
-import qualified IO.Utils.Command as D
-import qualified IO.Utils.Lexer as L
-import qualified IO.Utils.Token as T
+module IO.Parser where
 import qualified ExpData.Expression as E
 import qualified ExpData.Operator as O
-
+import qualified IO.Command as D
+import qualified IO.Utils.Lexer as L
+import qualified IO.Utils.Token as T
 
 
 
@@ -271,7 +270,7 @@ parse_parens input =
     case t of 
         T.DelimiterToken "(" ->
             extract_parenthetical input1 `bind` (\(parens, input2) ->
-            parse_f parens `bind` (\(exp, _) -> -- parse_expr
+            parse_expr parens `bind` (\(exp, _) ->
             Just (E.Parenthetical exp, input2)))
         _ -> Nothing)
 
@@ -289,12 +288,20 @@ split_equals input =
             _ -> split_equals' tokens (t : revtokens)
     in split_equals' input []
 
+{- Helper function for parsing a command -}
+remove_while :: (a -> Bool) -> [a] -> [a]
+remove_while f [] = []
+remove_while f (l : lst) = if f l
+    then remove_while f lst
+    else l : lst
+
+{- Parse user input into a command -}
 parse_input :: [Char] -> Maybe D.Command
 parse_input input
-    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\about" = Just D.About
-    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\bindings" = Just D.Bindings
-    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\exit" = Just D.Exit
-    | filter (\l -> (l /= ' ') && (l /= '\t')) input == "\\help" = Just D.Help
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\about" = Just D.About
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\bindings" = Just D.Bindings
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\exit" = Just D.Exit
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\help" = Just D.Help
     | otherwise =
         let lexed_input = L.lex input
         in case split_equals lexed_input of

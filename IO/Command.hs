@@ -4,7 +4,7 @@
  - 
  - File for handling commands
  - program -}
-module IO.Utils.Command where
+module IO.Command where
 import qualified ExpData.Expression as E
 
 
