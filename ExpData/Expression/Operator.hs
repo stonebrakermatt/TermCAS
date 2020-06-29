@@ -4,7 +4,7 @@
  - 
  - File for handling commands
  - program -}
-module ExpData.Operator where
+module ExpData.Expression.Operator where
 
 
 

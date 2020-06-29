@@ -10,8 +10,9 @@ import qualified IO.Dialog.About as A
 import qualified IO.Dialog.Help as H
 import qualified IO.Dialog.Welcome as W
 import qualified IO.Parser as P
-import qualified ExpData.ContextUtils as C
-import qualified ExpData.Expression as E 
+import qualified ExpData.Context.Type as T
+import qualified ExpData.Context.Utils as U
+import qualified ExpData.Expression.Type as E 
 
 
 
@@ -23,7 +24,7 @@ main = repl 0 []
 
 {- Stores a counter and a context of 
  - variable bindings and recurses -}
-repl :: Int -> E.Context -> IO ()
+repl :: Int -> T.Context -> IO ()
 repl n context = if n == 0
     then do 
         W.welcome
@@ -58,9 +59,9 @@ repl n context = if n == 0
  - as to prevent a dependency error on the rvalue expression -}
 argcontext args = 
     let eliminate (Just a) = a
-        eliminate (Nothing) = E.Variable ("pi", E.Num "pi")
+        eliminate (Nothing) = T.Variable ("pi", E.Num "pi")
     in 
-        let maybe_context = map (\x -> C.create_context_entry x x) args
+        let maybe_context = map (\x -> U.create_context_entry x x) args
         in map eliminate maybe_context
 
 {- Makes sure functions are defined in terms of a 
@@ -70,16 +71,16 @@ filterfunction arg = case arg of
     _ -> False
 
 {- Handler for assigning a variable or function a definition -}
-handle_assign :: Int -> E.Context -> E.Expression -> E.Expression -> IO ()
+handle_assign :: Int -> T.Context -> E.Expression -> E.Expression -> IO ()
 handle_assign n context e1 e2 = case e1 of
     E.FCall f args -> 
         if length (filter filterfunction args) == length args
             then
                 if (argcontext args ++ context) 
-                    `E.satisfies_dependencies` 
+                    `U.satisfies_dependencies` 
                     (E.get_dependencies e2)
-                    then case C.create_context_entry e1 e2 of
-                        Just entry -> repl (n + 1) (C.context_insert context entry)
+                    then case U.create_context_entry e1 e2 of
+                        Just entry -> repl (n + 1) (U.context_insert context entry)
                         Nothing -> do
                             putStrLn "Error occurred while creating variable"
                             repl n context
@@ -90,9 +91,9 @@ handle_assign n context e1 e2 = case e1 of
                 putStrLn "Error with function arguments"
                 repl n context
     E.Id x -> 
-        if context `E.satisfies_dependencies` (E.get_dependencies e2)
-            then case C.create_context_entry e1 e2 of
-                Just entry -> repl (n + 1) (C.context_insert context entry)
+        if context `U.satisfies_dependencies` (E.get_dependencies e2)
+            then case U.create_context_entry e1 e2 of
+                Just entry -> repl (n + 1) (U.context_insert context entry)
                 Nothing -> do
                     putStrLn "Error occurred while creating variable"
                     repl n context
@@ -104,10 +105,10 @@ handle_assign n context e1 e2 = case e1 of
         repl n context
    
 {- Handler for evaluating an expression -}
-handle_eval :: Int -> E.Context ->  E.Expression -> IO ()
-handle_eval n context e = if context `E.satisfies_dependencies` (E.get_dependencies e)
+handle_eval :: Int -> T.Context ->  E.Expression -> IO ()
+handle_eval n context e = if context `U.satisfies_dependencies` (E.get_dependencies e)
     then do
-        putStrLn ("OUT: " ++ (show (e `E.apply_all_context` context)))
+        putStrLn ("OUT: " ++ (show (e `U.apply_all_context` context)))
         repl (n + 1) context
     else do
         sequence_ (map (putStrLn . show) (E.get_dependencies e))

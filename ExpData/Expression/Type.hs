@@ -4,11 +4,10 @@
  - 
  - File for handling commands
  - program -}
-module ExpData.Expression where
+module ExpData.Expression.Type where
+import qualified ExpData.Expression.Operator as O
 import qualified IO.Utils.Capture as C
 import qualified IO.Utils.Regex.GrammarRegexes as G
-import qualified IO.Utils.Regex.Keywords as K
-import qualified ExpData.Operator as O
 
 
 
@@ -80,7 +79,7 @@ is_integer (Num n) = case n `C.capture` G.regex_int of
         if rem == []
             then True
             else False
-     
+
 
 
 {- Utility for substituting an expression for a variable -}
@@ -127,11 +126,6 @@ type ExpressionDependency = (DependencyKind, [Char])
 
 
 
-{- Utility for mapping context entries to dependencies -}
-context_to_dependency :: ContextEntry -> ExpressionDependency
-context_to_dependency (Function (f, args, expr)) = (F (length args), f)
-context_to_dependency (Variable (v, expr)) = (V, v)
-
 {- Utility for getting the dependencies of the expression -}
 get_dependencies :: Expression -> [ExpressionDependency]
 get_dependencies (Negate e) = get_dependencies e
@@ -142,39 +136,3 @@ get_dependencies (FCall f args) =
     (F (length args), f) : foldr (++) [] (map get_dependencies args)
 get_dependencies (Id x) = [(V, x)]
 get_dependencies (Num n) = []
-
-{- Utility for seeing if a given context satisfies a dependency list -}
-satisfies_dependencies :: Context -> [ExpressionDependency] -> Bool
-satisfies_dependencies _ [] = True
-satisfies_dependencies [] _ = False
-satisfies_dependencies context (d : deps) = case get_dependency context d of
-    Just _ -> satisfies_dependencies context deps
-    Nothing -> False
-
-{- Looks up a context entry for a specific dependency -}
-get_dependency :: Context -> ExpressionDependency -> Maybe ContextEntry
-get_dependency [] _ = Nothing
-get_dependency (c : context) dep
-    | context_to_dependency c == dep = Just c
-    | otherwise = get_dependency context dep
-
-{- Apply context entry to an expression -}
-apply_context :: Expression -> ContextEntry -> Expression
-apply_context e (Function (f, args, expr)) = case e of
-    Negate e1 -> Negate (apply_context e1 (Function (f, args, expr)))
-    Binary o e1 e2 -> 
-        Binary o 
-            (apply_context e1 (Function (f, args, expr)))
-            (apply_context e2 (Function (f, args, expr)))
-    Parenthetical e1 -> Parenthetical (apply_context e1 (Function (f, args, expr)))
-    FCall f1 args1 -> if f1 == f
-        then substitute_args args args1 expr
-        else FCall f1 args1
-    other -> other
-apply_context e (Variable (x, expr)) = substitute x expr e
-
-{- Applies many context entries -}
-apply_all_context :: Expression -> Context -> Expression
-apply_all_context expr [] = expr
-apply_all_context expr (c : context) = 
-    apply_all_context (apply_context expr c) context
