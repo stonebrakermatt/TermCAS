@@ -298,10 +298,10 @@ remove_while f (l : lst) = if f l
 {- Parse user input into a command -}
 parse_input :: [Char] -> Maybe D.Command
 parse_input input
-    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\about" = Just D.About
-    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\bindings" = Just D.Bindings
-    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\exit" = Just D.Exit
-    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\help" = Just D.Help
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\about" = Just (D.Builtin D.About)
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\bindings" = Just (D.Builtin D.Bindings)
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\exit" = Just (D.Builtin D.Exit)
+    | remove_while (\l -> (l == ' ') && (l == '\t')) input == "\\help" = Just (D.Builtin D.Help)
     | otherwise =
         let lexed_input = L.lex input
         in case split_equals lexed_input of

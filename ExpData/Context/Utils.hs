@@ -7,6 +7,7 @@
 module ExpData.Context.Utils where
 import qualified ExpData.Context.Type as C
 import qualified ExpData.Expression.Type as E
+import qualified ExpData.Expression.Utils as U
 
 
 
@@ -67,10 +68,10 @@ apply_context e (C.Function (f, args, expr)) = case e of
             (apply_context e2 (C.Function (f, args, expr)))
     E.Parenthetical e1 -> E.Parenthetical (apply_context e1 (C.Function (f, args, expr)))
     E.FCall f1 args1 -> if f1 == f
-        then E.substitute_args args args1 expr
+        then U.substitute_args args args1 expr
         else E.FCall f1 args1
     other -> other
-apply_context e (C.Variable (x, expr)) = E.substitute x expr e
+apply_context e (C.Variable (x, expr)) = U.substitute x expr e
 
 {- Applies many context entries -}
 apply_all_context :: E.Expression -> C.Context -> E.Expression

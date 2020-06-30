@@ -35,7 +35,14 @@ match user_input =
         match' user_input ((re, tokenizer) : match_context) =
             case user_input `C.capture` re of
                 Nothing -> match' user_input match_context
-                Just (tok, input_tail) -> (input_tail, tokenizer tok)
+                Just (tok, input_tail) -> case tokenizer tok of
+                    T.NumLiteralToken n -> case match' user_input match_context of
+                        (user_input', T.SpaceToken "") -> (user_input', T.SpaceToken "")
+                        (input_tail', tok') -> 
+                            if length input_tail > length input_tail'
+                                then (input_tail', tok')
+                                else (input_tail, T.NumLiteralToken n)
+                    _ -> (input_tail, tokenizer tok)
     in match' user_input match_context
 
 {- Lexes all user input, using match -}
@@ -60,4 +67,4 @@ remove_spaces revtokens =
 
 {- Lexes input and removes spaces -}
 lex :: [Char] -> [T.InputToken]
-lex = remove_spaces.lex_input
+lex = remove_spaces . lex_input

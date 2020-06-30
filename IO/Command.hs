@@ -11,11 +11,15 @@ import qualified ExpData.Expression.Type as E
 
 
 
-data Command 
-    = Eval E.Expression
-    | Assign E.Expression E.Expression
-    | About
+data Builtin
+    = About
     | Bindings
     | Exit
     | Help
-    deriving (Read, Show)
+    deriving (Read, Show, Eq)
+
+data Command 
+    = Eval E.Expression
+    | Assign E.Expression E.Expression
+    | Builtin Builtin
+    deriving (Read, Show, Eq)
