@@ -1,130 +1,103 @@
 {- TermCAS
  - v0.1.0
  - (c) 2020 Matt Stonebraker
- - 
+ -
  - Main file -}
 module Main where
 import System.IO
 import qualified IO.Command as D
-import qualified IO.Dialog.About as A
-import qualified IO.Dialog.Help as H
-import qualified IO.Dialog.Welcome as W
 import qualified IO.Parser as P
-import qualified ExpData.Context.Type as T
+import qualified ExpData.Context.Type as C
+import qualified ExpData.Expression.Type as E
 import qualified ExpData.Context.Utils as U
-import qualified ExpData.Expression.Utils as F
-import qualified ExpData.Expression.Type as E 
 
-
-
-
-
-{- Main function -}
-main :: IO ()
+{- Calls the main loop with a turn number of zero
+ - and empty context -}
 main = repl 0 []
 
-{- Stores a counter and a context of 
- - variable bindings and recurses -}
-repl :: Int -> T.Context -> IO ()
-repl n context = if n == 0
-    then do 
-        W.welcome
-        repl 1 context
-    else do
-        putStr $ show n ++ " => "
-        hFlush stdout
-        str <- getLine
-        case P.parse_input str of 
-            Just (D.Builtin b) -> handle_builtin n context b 
-            Just (D.Assign e1 e2) -> handle_assign n context e1 e2 
-            Just (D.Eval e) -> handle_eval n context e         
+{- Helper for spacing the prompt -}
+prompt_spaces :: Int -> [Char]
+prompt_spaces n = if n > 999 
+    then " "
+    else take (4 - length (show n)) (repeat ' ') 
+
+{- Main program loop -}
+repl :: Int -> C.Context -> IO ()
+repl n context = do
+    putStr (show n ++ prompt_spaces n ++ "=> ")
+    hFlush stdout
+    str <- getLine
+    case P.parse_input str of
+        Left cmd -> case cmd of
+            D.Builtin b -> handle_builtin b n context
+            D.Assign e1 e2 -> handle_assign e1 e2 n context
             _ -> do
-                putStrLn "Error occurred while parsing input"
-                repl n context
+                putStrLn ("out: " ++ show cmd)
+                repl (n + 1) context
+        Right err -> do
+            putStrLn ("Error occurred while parsing input: " ++ show err)
+            repl n context
+
+handle_assign_function :: [Char] -> [E.Expression] -> E.Expression -> Int -> C.Context -> IO ()
+handle_assign_function f args expr n context = repl n context
+handle_assign_variable x expr n context = repl n context
+
+handle_assign :: E.Expression -> E.Expression -> Int -> C.Context -> IO ()
+handle_assign e1 e2 n context = case e1 of
+    E.FCall f args -> handle_assign_function f args e2 n context
+    E.Id x -> handle_assign_variable x e2 n context
+    _ -> putStrLn "Error: cannot bind to this expression"
+
+{- Handler for builtin commands such as \about, \bindings,
+ - \exit, and \help -}
+handle_builtin :: D.Builtin -> Int -> C.Context -> IO ()
+handle_builtin (D.About) n context = do
+    sequence_ about_dialog
+    repl n context
+handle_builtin (D.Bindings) n context = do
+    putStrLn ""
+    putStrLn "Current bindings:"
+    sequence_ (map (putStrLn . show) context)
+    putStrLn ""
+    repl n context
+handle_builtin (D.Exit) n context = return ()
+handle_builtin (D.Help) n context = do
+    sequence_ help_dialog
+    repl n context
+
+{- About, help, and welcome messages -}
+about_dialog :: [IO ()]
+about_dialog =
+    [ putStrLn ""
+    , putStrLn "TermCAS is free software. Do whatever you want with it."
+    , putStrLn "" ]
+help_dialog :: [IO ()]
+help_dialog =
+    [ putStrLn ""
+    , putStrLn "Basic usage:"
+    , putStrLn ""
+    , putStrLn "1) \"<var>\""
+    , putStrLn "In this case, the expression will be evaluated."
+    , putStrLn ""
+    , putStrLn "2) \"<var>=<expr>\""
+    , putStrLn "In this case, a variable bound to the string \"var\""
+    , putStrLn "will be created (or overwritten, if one existed)."
+    , putStrLn "These variables can then be used in evaluating expressions."
+    , putStrLn "" ]
+welcome_dialog :: [IO ()]
+welcome_dialog =
+    [ putStrLn ""
+    , putStrLn "TermCAS v.0.1.0 - try \"\\about\" or \"\\help\""
+    , putStrLn "\"\\exit\" to quit"
+    , putStrLn "" ]
 
 
-
-{- Handles builtin commands -}
-handle_builtin :: Int -> T.Context -> D.Builtin -> IO ()
-handle_builtin n context b = case b of
-    D.About -> do
-        A.about
-        repl n context
-    D.Bindings -> do
-        putStrLn ""
-        putStrLn "Current bindings:"
-        sequence_ (map (putStrLn . show) context)
-        putStrLn ""
-        repl n context
-    D.Exit -> return ()
-    D.Help -> do
-        H.help
-        repl n context
 
 {- Creates a fake, temporary, context for function arguments so
  - as to prevent a dependency error on the rvalue expression -}
-argcontext args = 
+argcontext args =
     let eliminate (Just a) = a
-        eliminate (Nothing) = T.Variable ("pi", E.Num "pi")
-    in 
+        eliminate (Nothing) = ((E.Id "pi", E.Num "pi"))
+    in
         let maybe_context = map (\x -> U.create_context_entry x x) args
         in map eliminate maybe_context
-
-{- Handler for assigning a variable or function a definition -}
-handle_assign :: Int -> T.Context -> E.Expression -> E.Expression -> IO ()
-handle_assign n context e1 e2 = case e1 of
-    E.FCall f args -> 
-        if length (filter
-            (\arg -> case arg of E.Id x -> True; _ -> False)
-            args) == length args
-            then
-                if (argcontext args ++ context) 
-                    `U.satisfies_dependencies` 
-                    (E.get_dependencies e2)
-                    then case U.create_context_entry e1 e2 of
-                        Just entry -> repl (n + 1) (U.context_insert context entry)
-                        Nothing -> do
-                            putStrLn "Error occurred while creating variable"
-                            repl n context
-                    else do
-                        putStrLn "Dependencies not satisfied for this assignment"
-                        putStrLn ""
-                        putStrLn "Dependencies:"
-                        sequence_ (map (putStrLn . show) (filter (\e ->
-                            not (e `elem` (map U.context_to_dependency (argcontext args)))) (E.get_dependencies e2)))
-                        putStrLn ""
-                        repl n context
-            else do
-                putStrLn "Error with function arguments"
-                repl n context
-    E.Id x -> 
-        if context `U.satisfies_dependencies` (E.get_dependencies e2)
-            then case U.create_context_entry e1 e2 of
-                Just entry -> repl (n + 1) (U.context_insert context entry)
-                Nothing -> do
-                    putStrLn "Error occurred while creating variable"
-                    repl n context
-            else do
-                putStrLn "Dependencies not satisfied for this assignment"
-                putStrLn ""
-                putStrLn "Dependencies:"
-                sequence_ (map (putStrLn . show) (E.get_dependencies e2))
-                putStrLn ""
-                repl n context
-    _ -> do
-        putStrLn "Cannot bind to this expression"
-        repl n context
-   
-{- Handler for evaluating an expression -}
-handle_eval :: Int -> T.Context ->  E.Expression -> IO ()
-handle_eval n context e = if context `U.satisfies_dependencies` (E.get_dependencies e)
-    then do
-        putStrLn ("OUT: " ++ (show (e `U.apply_all_context` context)))
-        repl (n + 1) context
-    else do 
-        putStrLn "Dependencies not satisfied for this expression"
-        putStrLn ""
-        putStrLn "Dependencies:"
-        sequence_ (map (putStrLn . show) (E.get_dependencies e))
-        putStrLn ""
-        repl n context

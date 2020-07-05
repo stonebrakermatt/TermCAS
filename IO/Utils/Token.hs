@@ -11,7 +11,7 @@ module IO.Utils.Token where
 
 
 {- Token type for lexing user input -}
-data InputToken 
+data InputToken
     = IdToken [Char]
     | OpToken [Char]
     | NumLiteralToken [Char]
@@ -23,7 +23,7 @@ data InputToken
 
 
 {- Token constructors. See Lexer for its use -}
-token_constructors = 
+token_constructors =
     [ DelimiterToken
     , OpToken
     , NumLiteralToken
@@ -35,7 +35,13 @@ token_constructors =
 instance Show InputToken where
     show (IdToken str) = "<id:" ++ str ++ ">"
     show (OpToken str) = "<op:" ++ str ++ ">"
-    show (NumLiteralToken str) = "<num:" ++ str ++ ">" 
+    show (NumLiteralToken str) = "<num:" ++ str ++ ">"
     show (DelimiterToken str) = "<del:" ++ str ++ ">"
-    show (SpaceToken str) = "<sp:" ++ str ++ ">" 
+    show (SpaceToken str) = "<sp:" ++ str ++ ">"
     show (BadInputToken str) = "<err:" ++ str ++ ">"
+
+has_bad_input :: [InputToken] -> (Bool, Maybe [Char])
+has_bad_input [] = (False, Nothing)
+has_bas_input (t : tokens) = case t of
+    BadInputToken b -> (True, Just b)
+    _ -> has_bad_input tokens

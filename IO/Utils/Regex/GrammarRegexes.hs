@@ -2,12 +2,12 @@
  - v0.1.0
  - (c) 2020 Matt Stonebraker
  -
- - File defining a regular expression data type 
+ - File defining a regular expression data type
  - as well as functions for how to display and
  - read data of this type -}
 module IO.Utils.Regex.GrammarRegexes where
 import qualified IO.Utils.Regex.Keywords as K
-import qualified IO.Utils.Regex.Type as R 
+import qualified IO.Utils.Regex.Type as R
 
 
 
@@ -43,7 +43,7 @@ regex_number_fractional_part = R.RegexAnd
 {- Handles the exponential part of a number entered
  - in scientific notation -}
 regex_number_exponential_part :: R.Regex Char
-regex_number_exponential_part = R.RegexAnd 
+regex_number_exponential_part = R.RegexAnd
     [ R.RegexOr
         [ R.RegexConst 'E'
         , R.RegexConst 'e' ]
@@ -51,7 +51,7 @@ regex_number_exponential_part = R.RegexAnd
 
 {- Regular expression for matching integers -}
 regex_int :: R.Regex Char
-regex_int = R.RegexAnd 
+regex_int = R.RegexAnd
     [ regex_number_integer_part
     , R.RegexMaybe regex_number_exponential_part ]
 
@@ -81,12 +81,10 @@ regex_identifier = R.RegexPlus (R.RegexOr
 regex_delimiter :: R.Regex Char
 regex_delimiter = R.RegexInSet "=(),"
 
-{- Regular expressions for prefix unary minus and 
+{- Regular expressions for prefix unary minus and
  - postfix factorial and prime notation derivatives -}
 regex_unary_operator :: R.Regex Char
-regex_unary_operator = R.RegexOr
-    [ R.RegexConst '-'
-    , R.RegexConst '!' ]
+regex_unary_operator = R.RegexConst '-'
 
 {- Regular expression for parsing binary expressions -}
 regex_binary_operator :: R.Regex Char
@@ -110,10 +108,10 @@ regex_space = R.RegexInSet " \t"
 
 
 {- All regexes for this grammar -}
-language_regexes = 
+language_regexes =
     [ regex_delimiter
     , regex_operator
     , regex_number
     , regex_identifier
     , regex_space
-    , regex_badinput ]  
+    , regex_badinput ]
