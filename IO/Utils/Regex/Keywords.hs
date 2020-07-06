@@ -2,25 +2,17 @@
  - v0.1.0
  - (c) 2020 Matt Stonebraker
  -
- - File defining the keywords for 
+ - File defining the keywords for
  - special string literals recognized
  - by this program -}
-module IO.Utils.Regex.Keywords 
-    ( builtin_commands
-    , special_funcs
-    , discrete_ops 
+module IO.Utils.Regex.Keywords
+    ( special_funcs
+    , discrete_ops
     , constants ) where
 
 
 
 
-
-{- Builtin commands -}
-builtin_commands = 
-    [ "\\about"
-    , "\\bindings"
-    , "\\exit"
-    , "\\help" ]
 
 {- Trig functions -}
 trig_funcs =
@@ -32,19 +24,19 @@ trig_funcs =
     , "cot"
     , "arcsin"
     , "arccos"
-    , "arctan" 
+    , "arctan"
     , "arccsc"
     , "arcsec"
     , "arccot" ]
 
 {- Hyperbolic trig functions and inverses -}
-hyp_trig_funcs = 
+hyp_trig_funcs =
     [ "sinh"
     , "cosh"
     , "tanh"
     , "csch"
     , "sech"
-    , "coth" 
+    , "coth"
     , "arcsinh"
     , "arccosh"
     , "arctanh"
@@ -60,15 +52,15 @@ special_funcs = ["exp", "log", "ln"]
     ++ hyp_trig_funcs
 
 {- All binary operator keywords -}
-discrete_ops = 
+discrete_ops =
     [ "mod"
     , "choose"
     , "permute" ]
 
 {- All keywords for special constants -}
-constants = 
+constants =
     [ "pi"
     , "tau"
     , "e"
     , "i"
-    , "phi"] 
+    , "phi"]

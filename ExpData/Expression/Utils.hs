@@ -2,8 +2,7 @@
  - v0.1.0
  - (c) 2020 Matt Stonebraker
  -
- - File for handling commands
- - program -}
+ - Utilities for working with expressions -}
 module ExpData.Expression.Utils where
 import Data.List
 import qualified ExpData.Expression.Type as E

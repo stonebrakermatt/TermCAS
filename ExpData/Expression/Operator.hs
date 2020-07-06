@@ -1,9 +1,8 @@
 {- TermCAS
  - v0.1.0
  - (c) 2020 Matt Stonebraker
- - 
- - File for handling commands
- - program -}
+ -
+ - File for builtin operators -}
 module ExpData.Expression.Operator where
 
 

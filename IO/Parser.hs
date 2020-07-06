@@ -1,7 +1,12 @@
+{- TermCAS
+ - v0.1.0
+ - (c) 2020 Matt Stonebraker
+ -
+ - File for parsing input -}
 module IO.Parser where
 import qualified ExpData.Expression.Type as E
 import qualified ExpData.Expression.Operator as O
-import qualified IO.Command as D
+import qualified IO.Command.Type as D
 import qualified IO.Utils.Lexer as L
 import qualified IO.Utils.Token as T
 

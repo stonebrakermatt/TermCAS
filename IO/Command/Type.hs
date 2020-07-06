@@ -2,9 +2,8 @@
  - v0.1.0
  - (c) 2020 Matt Stonebraker
  -
- - File for handling commands
- - program -}
-module IO.Command where
+ - File for handling commands -}
+module IO.Command.Type where
 import qualified ExpData.Expression.Type as E
 
 
@@ -31,6 +30,6 @@ data Command
     deriving (Read, Eq)
 
 instance Show Command where
-    show (Eval e) = "cmd: evaluate " ++ show e
-    show (Assign e1 e2) = "cmd: assign " ++ show e1 ++ " to " ++ show e2
-    show (Builtin b) = "cmd: " ++ show b
+    show (Eval e) = "evaluate " ++ show e
+    show (Assign e1 e2) = "assign " ++ show e1 ++ " to " ++ show e2
+    show (Builtin b) = show b

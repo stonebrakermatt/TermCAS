@@ -2,27 +2,28 @@
  - v0.1.0
  - (c) 2020 Matt Stonebraker
  -
- - File for handling commands
- - program -}
+ - Utilities for working with context -}
 module ExpData.Context.Utils where
+import Data.List as L
+import Data.Map as M
 import qualified ExpData.Context.Type as C
+import qualified ExpData.Dependency.Type as D
 import qualified ExpData.Expression.Type as E
 
 
 
 
 
-create_context_entry :: E.Expression -> E.Expression -> Maybe C.ContextEntry
-create_context_entry e expr = case e of
-    E.Id x -> Just (e, expr)
-    E.FCall f args -> Just (e, expr)
-    _ -> Nothing
+create_context_entry :: E.Expression -> E.Expression -> C.ContextEntry
+create_context_entry e1 e2 = (e1, e2)
 
-context_insert :: C.Context -> C.ContextEntry -> C.Context
-context_insert [] entry = [entry]
-context_insert (c : context) entry =
-    let context_insert' [] entry revcontext = reverse (entry : revcontext)
-        context_insert' (c : context) entry revcontext
-            | fst c == fst entry = reverse revcontext ++ (entry : context)
-            | otherwise = context_insert' context entry (c : revcontext)
-    in context_insert' context entry []
+create_context_key :: E.Expression -> Maybe D.ExpressionDependency
+create_context_key (E.Id x) = Just (x, D.V)
+create_context_key (E.FCall f args)
+    | length (L.filter (\arg -> case arg of E.Id x -> True ; _ -> False) args) == length args =
+        Just (f, D.F (length args))
+    | otherwise = Nothing
+create_context_key _ = Nothing
+
+context_insert :: C.Context -> (D.ExpressionDependency, C.ContextEntry) -> C.Context
+context_insert context (key, entry) = M.insert key entry context

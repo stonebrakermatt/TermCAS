@@ -2,8 +2,7 @@
  - v0.1.0
  - (c) 2020 Matt Stonebraker
  -
- - File for handling commands
- - program -}
+ - File defining an expression type -}
 module ExpData.Expression.Type where
 import qualified ExpData.Expression.Operator as O
 import qualified IO.Utils.Regex.Keywords as K
@@ -11,6 +10,8 @@ import qualified IO.Utils.Regex.Keywords as K
 
 
 
+
+{- Expression type -}
 data Expression
     = Negate Expression
     | Binary O.Op Expression Expression
@@ -27,8 +28,8 @@ get_arg_str :: [Expression] -> [String]
 get_arg_str exprs = map show exprs
 add_commas :: [String] -> String -> String
 add_commas [] revStr = reverse revStr
-add_commas (s : []) revStr = reverse (s ++ revStr)
-add_commas (s1 : s2 : strs) revStr = add_commas (s2 : strs) ("," ++ s1 ++ revStr)
+add_commas (s : []) revStr = reverse (reverse s ++ revStr)
+add_commas (s1 : s2 : strs) revStr = add_commas (s2 : strs) ("," ++ reverse s1 ++ revStr)
 
 {- How to print expressions -}
 instance Show Expression where
